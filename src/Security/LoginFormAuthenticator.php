@@ -22,14 +22,16 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     public const LOGIN_ROUTE = 'app_login';
 
-    public function __construct(private UrlGeneratorInterface $urlGenerator)
+    private UrlGeneratorInterface $urlGenerator;
+
+    public function __construct(UrlGeneratorInterface $urlGenerator)
     {
+        $this->urlGenerator = $urlGenerator;
     }
 
     public function authenticate(Request $request): Passport
     {
         $login = $request->getPayload()->getString('login');
-
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $login);
 
         return new Passport(
@@ -44,13 +46,23 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
+        // Redirige vers la dernière page visitée si dispo
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
 
-        // For example:
-        // return new RedirectResponse($this->urlGenerator->generate('some_route'));
-        throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
+        // Redirection selon rôle
+        $roles = $token->getRoleNames();
+
+        if (in_array('ROLE_SUPER_ADMIN', $roles)) {
+            return new RedirectResponse($this->urlGenerator->generate('app_profil'));
+        }
+
+        if (in_array('ROLE_ADMIN', $roles)) {
+            return new RedirectResponse($this->urlGenerator->generate('app_profil'));
+        }
+
+        return new RedirectResponse($this->urlGenerator->generate('app_profil'));
     }
 
     protected function getLoginUrl(Request $request): string

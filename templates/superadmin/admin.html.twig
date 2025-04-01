@@ -1,0 +1,41 @@
+{% extends 'base/site_base.html.twig' %}
+
+{% block title %}Gérer les Admins{% endblock %}
+
+{% block body %}
+    <h1>Liste des Administrateurs</h1>
+
+    {% for message in app.flashes('success') %}
+        <div style="color: green; margin-bottom: 1em;">✅ {{ message }}</div>
+    {% endfor %}
+
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Login</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Date de naissance</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for admin in admins %}
+                <tr>
+                    <td>{{ admin.login }}</td>
+                    <td>{{ admin.nom }}</td>
+                    <td>{{ admin.prenom }}</td>
+                    <td>{{ admin.dateNaissance ? admin.dateNaissance|date('d/m/Y') : 'N/A' }}</td>
+                    <td>
+                        <a href="{{ path('superadmin_admins_delete', {id: admin.id}) }}"
+                           onclick="return confirm('Supprimer cet admin ?');">🗑️ Supprimer</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5">Aucun admin trouvé.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

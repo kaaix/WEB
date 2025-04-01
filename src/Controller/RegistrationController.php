@@ -11,12 +11,12 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
 class RegistrationController extends AbstractController
 {
     #[Route('/register', name: 'register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager): Response
+    public function register(Request $request, UserPasswordHasherInterface $hasher, Security $security, EntityManagerInterface $em): Response
     {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -24,19 +24,14 @@ class RegistrationController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $plainPassword = $form->get('plainPassword')->getData();
+            $user->setPassword($hasher->hashPassword($user, $plainPassword));
 
-            // Encodage du mot de passe
-            $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
-
-            // Infos supplémentaires
             $user->setRoles(['ROLE_CLIENT']);
             $user->setActif(true);
 
-            // Sauvegarde en base
-            $entityManager->persist($user);
-            $entityManager->flush();
+            $em->persist($user);
+            $em->flush();
 
-            // Connexion automatique
             return $security->login($user, LoginFormAuthenticator::class, 'main');
         }
 

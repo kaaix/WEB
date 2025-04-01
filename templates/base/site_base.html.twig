@@ -6,7 +6,7 @@
         {% if app.user %}
             <li>Bienvenue {{ app.user.nom }}</li>
             <li><a href="{{ path('app_logout') }}">Déconnexion</a></li>
-            <li><a href="{{ path('profil') }}">Mon profil</a></li>
+            <li><a href="{{ path('app_profil') }}">Mon profil</a></li>
 
             {% if 'ROLE_ADMIN' in app.user.roles %}
                 <li><a href="{{ path('admin_users') }}">Gérer les utilisateurs</a></li>
@@ -16,10 +16,10 @@
             {% if 'ROLE_SUPER_ADMIN' in app.user.roles %}
                 <li><a href="{{ path('superadmin_admins') }}">Gérer les admins</a></li>
             {% endif %}
-
         {% else %}
             <li><a href="{{ path('app_login') }}">Connexion</a></li>
             <li><a href="{{ path('register') }}">Créer un compte</a></li>
         {% endif %}
     </ul>
 {% endblock %}
+

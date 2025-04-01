@@ -4,13 +4,11 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[UniqueEntity(fields: ['login'], message: 'There is already an account with this login')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -19,33 +17,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Assert\NotBlank]
+    #[Assert\NotBlank()]
     private ?string $login = null;
 
     #[ORM\Column]
     private array $roles = [];
 
     #[ORM\Column]
-    #[Assert\NotBlank]
     private ?string $password = null;
 
-    #[ORM\Column(length: 50)]
-    #[Assert\NotBlank]
+    // ✅ Champ temporaire non mappé pour le formulaire
+    #[Assert\NotBlank()]
+    #[Assert\Length(min: 6, max: 4096)]
+    private ?string $plainPassword = null;
+
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank()]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 50)]
-    #[Assert\NotBlank]
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank()]
     private ?string $prenom = null;
 
     #[ORM\Column(type: 'date')]
-    #[Assert\NotBlank]
+    #[Assert\NotBlank()]
     private ?\DateTimeInterface $dateNaissance = null;
+
+    #[ORM\ManyToOne]
+    private ?Pays $pays = null;
 
     #[ORM\Column(type: 'boolean')]
     private bool $actif = true;
-
-    #[ORM\ManyToOne(targetEntity: Pays::class)]
-    private ?Pays $pays = null;
 
     public function getId(): ?int
     {
@@ -92,11 +94,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function eraseCredentials(): void
+    public function getPlainPassword(): ?string
     {
-        // Si tu stockes des données sensibles temporairement, tu peux les vider ici
+        return $this->plainPassword;
     }
 
+    public function setPlainPassword(?string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
+        return $this;
+    }
+
+    public function eraseCredentials(): void
+    {
+        $this->plainPassword = null;
+    }
 
     public function getNom(): ?string
     {
@@ -131,17 +143,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function isActif(): bool
-    {
-        return $this->actif;
-    }
-
-    public function setActif(bool $actif): self
-    {
-        $this->actif = $actif;
-        return $this;
-    }
-
     public function getPays(): ?Pays
     {
         return $this->pays;
@@ -150,6 +151,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPays(?Pays $pays): self
     {
         $this->pays = $pays;
+        return $this;
+    }
+
+    public function isActif(): bool
+    {
+        return $this->actif;
+    }
+
+    public function setActif(bool $actif): self
+    {
+        $this->actif = $actif;
         return $this;
     }
 }

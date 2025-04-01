@@ -1,0 +1,40 @@
+{% extends 'base/site_base.html.twig' %}
+
+{% block title %}Gérer les utilisateurs{% endblock %}
+
+{% block body %}
+    <h1>Liste des utilisateurs</h1>
+
+    {% for message in app.flashes('success') %}
+        <div style="color: green; margin-bottom: 1em;"> {{ message }}</div>
+    {% endfor %}
+
+    <table border="1" cellpadding="5">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Login</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Date de naissance</th>
+                <th>Rôles</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.login }}</td>
+                    <td>{{ user.nom }}</td>
+                    <td>{{ user.prenom }}</td>
+                    <td>{{ user.dateNaissance ? user.dateNaissance|date('d/m/Y') : 'N/A' }}</td>
+                    <td>{{ user.roles|join(', ') }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6">Aucun utilisateur trouvé.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
