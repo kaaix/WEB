@@ -16,4 +16,12 @@
             Visiteur anonyme
         {% endif %}
     </p>
+
+    {% if is_granted('ROLE_SUPER_ADMIN') %}
+        <a href="{{ path('admin_fixtures_load') }}" 
+           style="display: inline-block; padding: 10px 15px; background: #ccc; border: 1px solid #999; text-decoration: none; margin-bottom: 20px;"
+           onclick="return confirm('Attention, cela va purger la base et recharger les fixtures. Continuer ?');">
+            Recharger les Fixtures
+        </a>
+    {% endif %}
 {% endblock %}

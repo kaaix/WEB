@@ -5,15 +5,23 @@ namespace App\Controller;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class SuperAdminController extends AbstractController
 {
-    #[Route('/superadmin/admins', name: 'superadmin_admins')]
-    public function listAdmins(EntityManagerInterface $em): Response
+    private $projectDir;
+
+    public function __construct(ParameterBagInterface $params)
     {
-        // Récupère tous les utilisateurs dont le champ roles contient "ROLE_ADMIN"
+        $this->projectDir = $params->get('kernel.project_dir');
+    }
+
+    #[Route('/superadmin/dashboard', name: 'superadmin_dashboard')]
+    public function dashboard(EntityManagerInterface $em): Response
+    {
+        // Récupère tous les utilisateurs ayant le rôle ROLE_ADMIN
         $admins = $em->getRepository(User::class)
             ->createQueryBuilder('u')
             ->where('u.roles LIKE :role')
@@ -38,6 +46,6 @@ class SuperAdminController extends AbstractController
 
         $this->addFlash('success', 'Administrateur supprimé.');
 
-        return $this->redirectToRoute('superadmin_admins');
+        return $this->redirectToRoute('superadmin_dashboard');
     }
 }

@@ -1,4 +1,3 @@
-{# templates/base/site_base.html.twig #}
 {% extends 'base/base.html.twig' %}
 
 {% block menu %}
@@ -14,7 +13,7 @@
             {% endif %}
 
             {% if 'ROLE_SUPER_ADMIN' in app.user.roles %}
-                <li><a href="{{ path('superadmin_admins') }}">Gérer les admins</a></li>
+                <li><a href="{{ path('superadmin_dashboard') }}">Gérer les admins</a></li>
             {% endif %}
         {% else %}
             <li><a href="{{ path('app_login') }}">Connexion</a></li>
@@ -22,4 +21,3 @@
         {% endif %}
     </ul>
 {% endblock %}
-
