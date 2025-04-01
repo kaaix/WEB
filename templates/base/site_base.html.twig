@@ -1,0 +1,25 @@
+{# templates/base/site_base.html.twig #}
+{% extends 'base/base.html.twig' %}
+
+{% block menu %}
+    <ul>
+        {% if app.user %}
+            <li>Bienvenue {{ app.user.nom }}</li>
+            <li><a href="{{ path('app_logout') }}">Déconnexion</a></li>
+            <li><a href="{{ path('profil') }}">Mon profil</a></li>
+
+            {% if 'ROLE_ADMIN' in app.user.roles %}
+                <li><a href="{{ path('admin_users') }}">Gérer les utilisateurs</a></li>
+                <li><a href="{{ path('admin_produits') }}">Ajouter un produit</a></li>
+            {% endif %}
+
+            {% if 'ROLE_SUPER_ADMIN' in app.user.roles %}
+                <li><a href="{{ path('superadmin_admins') }}">Gérer les admins</a></li>
+            {% endif %}
+
+        {% else %}
+            <li><a href="{{ path('app_login') }}">Connexion</a></li>
+            <li><a href="{{ path('register') }}">Créer un compte</a></li>
+        {% endif %}
+    </ul>
+{% endblock %}
