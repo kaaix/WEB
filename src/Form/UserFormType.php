@@ -11,11 +11,31 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class UserFormType extends AbstractType
 {
+    private Security $security;
+
+    public function __construct(Security $security)
+    {
+        $this->security = $security;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $currentUser = $this->security->getUser();
+        $currentRoles = $currentUser ? $currentUser->getRoles() : [];
+
+        $roleChoices = [];
+
+        // 🔒 Règles du sujet :
+        if (in_array('ROLE_ADMIN', $currentRoles)) {
+            $roleChoices = ['Client' => 'ROLE_CLIENT'];
+        } elseif (in_array('ROLE_SUPER_ADMIN', $currentRoles)) {
+            $roleChoices = ['Admin' => 'ROLE_ADMIN'];
+        }
+
         $builder
             ->add('login')
             ->add('plainPassword', PasswordType::class, [
@@ -31,12 +51,8 @@ class UserFormType extends AbstractType
             ])
             ->add('roles', ChoiceType::class, [
                 'label' => 'Rôle',
-                'choices' => [
-                    'Client' => 'ROLE_CLIENT',
-                    'Admin' => 'ROLE_ADMIN',
-                    'Super Admin' => 'ROLE_SUPER_ADMIN',
-                ],
-                'multiple' => true,
+                'choices' => $roleChoices,
+                'multiple' => true, // Important : pas plusieurs rôles à la fois
                 'expanded' => true,
             ])
             ->add('pays', EntityType::class, [

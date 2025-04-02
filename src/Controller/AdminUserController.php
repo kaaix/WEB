@@ -33,8 +33,6 @@ class AdminUserController extends AbstractController
             return $this->redirectToRoute('admin_users');
         }
 
-        // (optionnel) Supprimer les éléments liés comme le panier ici
-
         $em->remove($user);
         $em->flush();
 
@@ -46,26 +44,26 @@ class AdminUserController extends AbstractController
     public function createUser(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher): Response
     {
         $user = new User();
+
+        // Sécurité : par défaut on force un rôle valide même si aucun n’est choisi
+        $user->setRoles(['ROLE_CLIENT']);
+
         $form = $this->createForm(UserFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $plainPassword = $form->get('plainPassword')->getData();
-
-            if ($plainPassword) {
-                $hashedPassword = $hasher->hashPassword($user, $plainPassword);
-                $user->setPassword($hashedPassword);
-            }
-
+            $user->setPassword($hasher->hashPassword($user, $plainPassword));
             $user->setActif(true);
+
             $em->persist($user);
             $em->flush();
 
-            $this->addFlash('success', 'Utilisateur ajouté avec succès.');
+            $this->addFlash('success', 'Utilisateur créé avec succès.');
             return $this->redirectToRoute('admin_users');
         }
 
-        return $this->render('admin/user_create.html.twig', [
+        return $this->render('admin/create_user.html.twig', [
             'form' => $form->createView(),
         ]);
     }
