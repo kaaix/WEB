@@ -1,0 +1,21 @@
+{% extends 'base/site_base.html.twig' %}
+
+{% block title %}Mon profil{% endblock %}
+
+{% block body %}
+    <h1>🧍 Modifier mon profil</h1>
+
+    {% for message in app.flashes('success') %}
+        <div style="color: green; font-weight: bold; margin-bottom: 15px;">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {{ form_start(form) }}
+        {{ form_row(form.nom) }}
+        {{ form_row(form.prenom) }}
+        {{ form_row(form.dateNaissance) }}
+        {{ form_row(form.pays) }}
+        <button class="btn btn-primary mt-3">✅ Modifier</button>
+    {{ form_end(form) }}
+{% endblock %}

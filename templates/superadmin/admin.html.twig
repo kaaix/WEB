@@ -1,0 +1,51 @@
+{% extends 'base/site_base.html.twig' %}
+
+{% block title %}Gérer les Admins{% endblock %}
+
+{% block body %}
+    <h1>Dashboard Super Administrateur</h1>
+    <p>Bienvenue, {{ app.user.nom }} {{ app.user.prenom }}.</p>
+
+    {# Bouton pour recharger les fixtures, visible ici pour le super-admin #}
+    <a href="{{ path('admin_fixtures_load') }}" 
+       style="display: inline-block; padding: 10px 15px; background: #ccc; border: 1px solid #999; text-decoration: none; margin-bottom: 20px;"
+       onclick="return confirm('Attention, cela va purger la base et recharger les fixtures. Continuer ?');">
+        Recharger les Fixtures
+    </a>
+
+    <h2>Liste des Administrateurs</h2>
+
+    {% for message in app.flashes('success') %}
+        <div style="color: green; margin-bottom: 1em;">✅ {{ message }}</div>
+    {% endfor %}
+
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Login</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Date de naissance</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for admin in admins %}
+                <tr>
+                    <td>{{ admin.login }}</td>
+                    <td>{{ admin.nom }}</td>
+                    <td>{{ admin.prenom }}</td>
+                    <td>{{ admin.dateNaissance ? admin.dateNaissance|date('d/m/Y') : 'N/A' }}</td>
+                    <td>
+                        <a href="{{ path('superadmin_admins_delete', {id: admin.id}) }}"
+                           onclick="return confirm('Supprimer cet admin ?');">🗑️ Supprimer</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5">Aucun admin trouvé.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
