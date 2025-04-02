@@ -17,6 +17,19 @@
     <div class="alert alert-danger">{{ message }}</div>
 {% endfor %}
 
+<!-- 🔎 Barre de recherche -->
+<div style="width: 90%; margin: 0 auto 20px auto;">
+    <input type="text" id="userSearch" class="form-control"
+           placeholder="🔎 Rechercher un login, nom ou rôle..."
+           style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+</div>
+
+<!-- ➕ Bouton Ajouter un utilisateur -->
+<div style="width: 90%; margin: 0 auto 20px auto; text-align: right;">
+    <a href="{{ path('admin_user_create') }}" class="btn btn-success">+ Ajouter un utilisateur</a>
+</div>
+
+<!-- 🧾 Tableau des utilisateurs -->
 <table class="table">
     <thead>
         <tr>
@@ -65,4 +78,17 @@
     {% endfor %}
     </tbody>
 </table>
+
+<!-- 🔍 Script de recherche côté client -->
+<script>
+    document.getElementById('userSearch').addEventListener('input', function () {
+        const value = this.value.toLowerCase();
+        const rows = document.querySelectorAll('table tbody tr');
+
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(value) ? '' : 'none';
+        });
+    });
+</script>
 {% endblock %}
