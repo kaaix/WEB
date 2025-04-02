@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -17,7 +16,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Assert\NotBlank()]
     private ?string $login = null;
 
     #[ORM\Column]
@@ -26,21 +24,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    // ✅ Champ temporaire non mappé pour le formulaire
-    #[Assert\NotBlank()]
-    #[Assert\Length(min: 6, max: 4096)]
+    // Champ temporaire non mappé, aucune contrainte ici !
     private ?string $plainPassword = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank()]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank()]
     private ?string $prenom = null;
 
     #[ORM\Column(type: 'date')]
-    #[Assert\NotBlank()]
     private ?\DateTimeInterface $dateNaissance = null;
 
     #[ORM\ManyToOne]
