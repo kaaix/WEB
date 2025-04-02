@@ -2,6 +2,11 @@
 
 {% block title %}Gestion des utilisateurs{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/admin_users.css') }}">
+{% endblock %}
+
 {% block body %}
 <h1>Liste des utilisateurs</h1>
 
@@ -32,7 +37,7 @@
             <td>{{ user.password }}</td>
             <td>{{ user.nom }}</td>
             <td>{{ user.prenom }}</td>
-            <td>{{ user.dateNaissance|date('d/m/Y') }}</td>
+            <td>{{ user.dateNaissance ? user.dateNaissance|date('d/m/Y') : '—' }}</td>
             <td>
                 {% if 'ROLE_SUPER_ADMIN' in user.roles %}
                     Super-admin
@@ -43,11 +48,7 @@
                 {% endif %}
             </td>
             <td>
-                {% if user.pays %}
-                    {{ user.pays.nom }}
-                {% else %}
-                    —
-                {% endif %}
+                {{ user.pays ? user.pays.nom : '—' }}
             </td>
             <td>
                 {% if user != app.user and 'ROLE_SUPER_ADMIN' not in user.roles %}

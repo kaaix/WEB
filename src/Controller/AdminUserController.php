@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Controller;
-
+use App\Repository\UserRepository;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -12,14 +12,14 @@ use Symfony\Component\Routing\Annotation\Route;
 class AdminUserController extends AbstractController
 {
     #[Route('/users', name: 'admin_users')]
-    public function usersList(EntityManagerInterface $em): Response
+    public function usersList(UserRepository $userRepository): Response
     {
-        $users = $em->getRepository(User::class)->findAll();
-
-        return $this->render('admin/users_list.html.twig', [
+        $users = $userRepository->findAllVisibleForAdmin($this->getUser());
+         return $this->render('admin/users_list.html.twig', [
             'users' => $users,
         ]);
     }
+
 
     #[Route('/user/delete/{id}', name: 'admin_user_delete')]
     public function deleteUser(User $user, EntityManagerInterface $em): Response
@@ -41,4 +41,7 @@ class AdminUserController extends AbstractController
         $this->addFlash('success', 'Utilisateur supprimé.');
         return $this->redirectToRoute('admin_users');
     }
+    
+
+
 }

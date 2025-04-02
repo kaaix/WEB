@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>{% block title %}Mon Site de Vente{% endblock %}</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    {% block stylesheets %}{% endblock %} {# ➕ Ajouté ce bloc ici ! #}
 </head>
 <body>
     <header>
@@ -37,7 +38,6 @@
         </div>
     </footer>
 
-    {# image d'arrière plan très légère #}
     <div class="background-logo">
         <img src="{{ asset('images/Universite_de_Poitiers.png') }}" alt="Logo UP" class="logo-fond">
     </div>

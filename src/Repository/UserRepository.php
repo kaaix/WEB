@@ -41,6 +41,24 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getResult();
     }
+      public function findAllVisibleForAdmin(User $admin): array
+{
+    $users = $this->createQueryBuilder('u')
+        ->andWhere('u != :admin')
+        ->setParameter('admin', $admin)
+        ->getQuery()
+        ->getResult();
+
+    // On filtre côté PHP car SQLite ne supporte pas JSON_CONTAINS dans DQL
+    return array_filter($users, function (User $user) {
+        return (
+            in_array('ROLE_CLIENT', $user->getRoles()) ||
+            in_array('ROLE_ADMIN', $user->getRoles())
+        ) && !in_array('ROLE_SUPER_ADMIN', $user->getRoles());
+    });
+}
+
+
 
     //    /**
     //     * @return User[] Returns an array of User objects
