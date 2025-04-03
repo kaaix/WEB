@@ -36,10 +36,13 @@ class AdminUserController extends AbstractController
     #[Route('/user/delete/{id}', name: 'admin_user_delete')]
     public function deleteUser(User $user, EntityManagerInterface $em): Response
     {
-        if ($user === $this->getUser() || in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
-            $this->addFlash('danger', 'Action interdite.');
-            return $this->redirectToRoute('admin_users');
-        }
+       if ($user === $this->getUser() || 
+            in_array('ROLE_ADMIN', $user->getRoles()) || 
+            in_array('ROLE_SUPER_ADMIN', $user->getRoles()) ) { 
+            $this->addFlash('danger', 'Vous ne pouvez pas supprimer cet utilisateur.');
+           return $this->redirectToRoute('admin_users');
+          }
+
 
         $em->remove($user);
         $em->flush();
