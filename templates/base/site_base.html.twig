@@ -1,11 +1,23 @@
 {% extends 'base/base.html.twig' %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/produit.css') }}">
+{% endblock %}
+
 {% block menu %}
     <ul>
         {% if app.user %}
             <li>Bienvenue {{ app.user.nom }}</li>
             <li><a href="{{ path('app_logout') }}">Déconnexion</a></li>
             <li><a href="{{ path('app_profil') }}">Mon profil</a></li>
+
+            {# 🔽🔽 AJOUT DU LIEN PANIER 🔽🔽 #}
+            {% if is_granted('ROLE_CLIENT') or is_granted('ROLE_ADMIN') %}
+                {% set panier = app.session.get('panier', {}) %}
+                {% set total_articles = panier|reduce((carry, v) => carry + v, 0) %}
+                <li><a href="{{ path('client_panier') }}">🛒 Mon panier ({{ total_articles }})</a></li>
+            {% endif %}
 
             {% if 'ROLE_ADMIN' in app.user.roles %}
                 <li><a href="{{ path('admin_users') }}">Gérer les utilisateurs</a></li>

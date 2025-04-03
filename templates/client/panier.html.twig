@@ -1,0 +1,52 @@
+{% extends 'base/site_base.html.twig' %}
+
+{% block title %}Mon Panier{% endblock %}
+
+{% block body %}
+    <h1>🛒 Mon Panier</h1>
+
+    {% if produits is empty %}
+        <p>Votre panier est vide.</p>
+    {% else %}
+        <div class="mb-3 text-end">
+            <form method="post" action="{{ path('client_panier_vider') }}">
+                <button type="submit" class="btn btn-danger">🗑️ Vider le panier</button>
+            </form>
+        </div>
+
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Nom</th>
+                    <th>Prix unitaire</th>
+                    <th>Quantité</th>
+                    <th>Sous-total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set total = 0 %}
+                {% for produit in produits %}
+                    {% set quantite = panier[produit.id] %}
+                    {% set sous_total = produit.prix * quantite %}
+                    {% set total = total + sous_total %}
+                    <tr>
+                        <td>
+                            <img src="{{ asset('images/produits/' ~ produit.image) }}"
+                                 alt="{{ produit.nom }}"
+                                 class="produit-image">
+                        </td>
+                        <td>{{ produit.nom }}</td>
+                        <td>{{ produit.prix }} €</td>
+                        <td>{{ quantite }}</td>
+                        <td>{{ sous_total }} €</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="4"><strong>Total</strong></td>
+                    <td><strong>{{ total }} €</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

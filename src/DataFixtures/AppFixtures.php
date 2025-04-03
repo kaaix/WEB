@@ -80,5 +80,21 @@ class AppFixtures extends Fixture
 
         // Sauvegarde en base
         $manager->flush();
+        $products = [
+    ['nom' => 'Zelda', 'prix' => 59.99, 'stock' => 100, 'image' => 'zelda.jpg'],
+    ['nom' => 'Mario Kart', 'prix' => 49.99, 'stock' => 80, 'image' => 'mario.jpg'],
+    ['nom' => 'Minecraft', 'prix' => 19.99, 'stock' => 200, 'image' => 'minecraft.jpg'],
+    ['nom' => 'FIFA 24', 'prix' => 69.99, 'stock' => 150, 'image' => 'fifa.jpg'],
+    ['nom' => 'Call of Duty', 'prix' => 59.99, 'stock' => 60, 'image' => 'cod.jpg'],
+];
+foreach ($products as $data) {
+    $produit = new \App\Entity\Produit();
+    $produit->setNom($data['nom']);
+    $produit->setPrix($data['prix']);
+    $produit->setStock($data['stock']);
+    $produit->setImage($data['image']); // <- ici on met juste le nom du fichier
+    $manager->persist($produit);
+}
+
     }
 }
