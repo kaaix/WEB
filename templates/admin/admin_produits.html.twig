@@ -1,0 +1,62 @@
+{# templates/admin/admin_produits.html.twig #}
+{% extends 'base/site_base.html.twig' %}
+
+{% block title %}Gestion des produits{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/admin_produits.css') }}">
+{% endblock %}
+
+{% block body %}
+    <h1>Liste des produits</h1>
+
+    <div class="text-end mb-3">
+        <a href="{{ path('admin_produit_ajouter') }}" class="btn btn-success">➕ Ajouter un produit</a>
+    </div>
+
+    {% if produits is empty %}
+        <p>Aucun produit disponible pour le moment.</p>
+    {% else %}
+        <table class="table table-striped produits-table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Description</th>
+                    <th>Prix</th>
+                    <th>Stock</th>
+                    <th>Image</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for produit in produits %}
+                    <tr>
+                        <td>{{ produit.nom|capitalize }}</td>
+                        <td>
+                            {% if produit.description|length > 50 %}
+                                {{ produit.description|slice(0, 50) ~ '...' }}
+                            {% else %}
+                                {{ produit.description }}
+                            {% endif %}
+                        </td>
+                        <td>{{ produit.prix }} €</td>
+                        <td>{{ produit.stock }}</td>
+                        <td>
+                            {% if produit.image %}
+                                <img src="{{ asset('uploads/produits/' ~ produit.image) }}" alt="Image de {{ produit.nom }}" width="80">
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ path('admin_produit_delete', {'id': produit.id}) }}"
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('Supprimer ce produit ?')">Supprimer</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

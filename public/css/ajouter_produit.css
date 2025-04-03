@@ -1,0 +1,39 @@
+.ajout-produit-form {
+    max-width: 600px;
+    margin: auto;
+    background: #fdfdfd;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.ajout-produit-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.ajout-produit-form label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.ajout-produit-form input,
+.ajout-produit-form textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.ajout-produit-form button {
+    padding: 0.7rem 1.5rem;
+    background-color: #1d90ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.ajout-produit-form button:hover {
+    background-color: #0d70d4;
+}

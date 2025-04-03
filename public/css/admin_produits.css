@@ -1,0 +1,33 @@
+/* public/css/admin_produits.css */
+
+.produits-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
+
+.produits-table th,
+.produits-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.produits-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.produits-table img {
+    border-radius: 4px;
+    box-shadow: 0 0 3px rgba(0,0,0,0.2);
+}
+
+h1 {
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    color: #333;
+}

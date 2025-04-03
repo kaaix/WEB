@@ -20,10 +20,16 @@ class AdminController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/produits', name: 'admin_produits')]
-    public function addProduit(): Response
-    {
-        // Pour l'instant, on affiche simplement un message placeholder
-        return $this->render('admin/produits.html.twig');
-    }
+#[Route('/admin/produits', name: 'admin_produits')]
+public function addProduit(EntityManagerInterface $em): Response
+{
+    // On récupère les produits depuis la BDD
+    $produits = $em->getRepository(\App\Entity\Produit::class)->findAll();
+
+    // On passe la variable à la vue
+    return $this->render('admin/admin_produits.html.twig', [
+        'produits' => $produits
+    ]);
+}
+
 }
