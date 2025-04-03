@@ -1,0 +1,46 @@
+{% extends 'base/site_base.html.twig' %}
+
+{% block title %}Créer un administrateur{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/admin_users.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1>Créer un nouvel administrateur</h1>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    {{ form_start(form) }}
+        <div class="mb-3">
+            {{ form_row(form.login) }}
+        </div>
+        <div class="mb-3">
+            {{ form_row(form.plainPassword) }}
+        </div>
+        <div class="mb-3">
+            {{ form_row(form.nom) }}
+        </div>
+        <div class="mb-3">
+            {{ form_row(form.prenom) }}
+        </div>
+        <div class="mb-3">
+            {{ form_row(form.dateNaissance) }}
+        </div>
+        <div class="mb-3">
+            {{ form_row(form.pays) }}
+        </div>
+
+        {# Le champ des rôles est masqué car on force ROLE_ADMIN côté contrôleur #}
+        <button type="submit" class="btn btn-primary">Créer</button>
+        <a href="{{ path('superadmin_admins') }}" class="btn btn-secondary">Retour</a>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

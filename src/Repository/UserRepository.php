@@ -20,7 +20,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * Used to upgrade (rehash) the user's password automatically over time.
+     * Permet de mettre à jour automatiquement le mot de passe haché.
      */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
@@ -32,56 +32,40 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
     }
+
+    /**
+     * Retourne les utilisateurs ayant un rôle donné.
+     * ⚠️ Version compatible SQLite (filtrage PHP).
+     */
     public function findByRole(string $role): array
     {
-        $qb = $this->createQueryBuilder('u');
-        return $qb
-            ->andWhere('JSON_CONTAINS(u.roles, :role) = 1')
-            ->setParameter('role', json_encode($role))
+        $users = $this->findAll();
+
+        return array_filter($users, function (User $user) use ($role) {
+            return in_array($role, $user->getRoles());
+        });
+    }
+
+    /**
+     * Retourne les utilisateurs visibles pour un admin (pas lui-même, pas les super-admins).
+     */
+    public function findAllVisibleForAdmin(User $admin): array
+    {
+        $users = $this->createQueryBuilder('u')
+            ->andWhere('u != :admin')
+            ->setParameter('admin', $admin)
             ->getQuery()
             ->getResult();
+
+        return array_filter($users, function (User $user) {
+            return (
+                in_array('ROLE_CLIENT', $user->getRoles()) ||
+                in_array('ROLE_ADMIN', $user->getRoles())
+            ) && !in_array('ROLE_SUPER_ADMIN', $user->getRoles());
+        });
     }
-      public function findAllVisibleForAdmin(User $admin): array
-{
-    $users = $this->createQueryBuilder('u')
-        ->andWhere('u != :admin')
-        ->setParameter('admin', $admin)
-        ->getQuery()
-        ->getResult();
 
-    // On filtre côté PHP car SQLite ne supporte pas JSON_CONTAINS dans DQL
-    return array_filter($users, function (User $user) {
-        return (
-            in_array('ROLE_CLIENT', $user->getRoles()) ||
-            in_array('ROLE_ADMIN', $user->getRoles())
-        ) && !in_array('ROLE_SUPER_ADMIN', $user->getRoles());
-    });
-}
-
-
-
-    //    /**
-    //     * @return User[] Returns an array of User objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('u.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?User
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    // 🚧 Fonctions de base générées (commentées)
+    // public function findByExampleField($value): array { ... }
+    // public function findOneBySomeField($value): ?User { ... }
 }

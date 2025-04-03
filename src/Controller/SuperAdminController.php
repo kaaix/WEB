@@ -3,49 +3,73 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Form\UserFormType;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/superadmin')]
 class SuperAdminController extends AbstractController
 {
-    private $projectDir;
 
-    public function __construct(ParameterBagInterface $params)
+     #[Route('/dashboard', name: 'superadmin_dashboard')]
+public function redirectToAdminList(): Response
+{
+    $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+    return $this->redirectToRoute('superadmin_admins');
+}
+
+    #[Route('/admins', name: 'superadmin_admins')]
+    public function listAdmins(UserRepository $userRepository): Response
     {
-        $this->projectDir = $params->get('kernel.project_dir');
-    }
+        $admins = $userRepository->findByRole('ROLE_ADMIN');
 
-    #[Route('/superadmin/dashboard', name: 'superadmin_dashboard')]
-    public function dashboard(EntityManagerInterface $em): Response
-    {
-        // Récupère tous les utilisateurs ayant le rôle ROLE_ADMIN
-        $admins = $em->getRepository(User::class)
-            ->createQueryBuilder('u')
-            ->where('u.roles LIKE :role')
-            ->setParameter('role', '%ROLE_ADMIN%')
-            ->getQuery()
-            ->getResult();
-
-        return $this->render('superadmin/admin.html.twig', [
+        return $this->render('superadmin/admins_list.html.twig', [
             'admins' => $admins,
         ]);
     }
 
-    #[Route('/superadmin/admins/delete/{id}', name: 'superadmin_admins_delete')]
-    public function deleteAdmin(User $user, EntityManagerInterface $em): Response
+    #[Route('/admin/create', name: 'superadmin_admin_create')]
+    public function createAdmin(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher): Response
     {
-        if (!in_array('ROLE_ADMIN', $user->getRoles())) {
-            throw $this->createAccessDeniedException("Ce n'est pas un admin.");
+        $user = new User();
+        $user->setRoles(['ROLE_ADMIN']); // on force le rôle admin
+
+        $form = $this->createForm(UserFormType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $plainPassword = $form->get('plainPassword')->getData();
+            $user->setPassword($hasher->hashPassword($user, $plainPassword));
+            $user->setActif(true);
+
+            $em->persist($user);
+            $em->flush();
+
+            $this->addFlash('success', 'Administrateur créé avec succès.');
+            return $this->redirectToRoute('superadmin_admins');
         }
 
-        $em->remove($user);
-        $em->flush();
+        return $this->render('superadmin/create_admin.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
 
-        $this->addFlash('success', 'Administrateur supprimé.');
+    #[Route('/admin/delete/{id}', name: 'superadmin_admin_delete')]
+    public function deleteAdmin(User $user, EntityManagerInterface $em): Response
+    {
+        if (in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
+            $this->addFlash('danger', 'Vous ne pouvez pas supprimer un super-admin.');
+        } else {
+            $em->remove($user);
+            $em->flush();
+            $this->addFlash('success', 'Administrateur supprimé.');
+        }
 
-        return $this->redirectToRoute('superadmin_dashboard');
+        return $this->redirectToRoute('superadmin_admins');
     }
 }

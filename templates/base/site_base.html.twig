@@ -14,6 +14,7 @@
 
             {% if 'ROLE_SUPER_ADMIN' in app.user.roles %}
                 <li><a href="{{ path('superadmin_dashboard') }}">Gérer les admins</a></li>
+                <li><a href="{{ path('admin_fixtures_load') }}">🔄 Réinitialiser les données</a></li>
             {% endif %}
         {% else %}
             <li><a href="{{ path('app_login') }}">Connexion</a></li>

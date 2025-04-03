@@ -14,7 +14,15 @@ use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/admin')]
 class AdminUserController extends AbstractController
-{
+{    
+
+
+    #[Route('', name: 'admin_dashboard')]
+    public function dashboardRedirect(): Response
+    {
+    return $this->redirectToRoute('admin_users');
+    }
+
     #[Route('/users', name: 'admin_users')]
     public function usersList(UserRepository $userRepository): Response
     {
@@ -41,30 +49,45 @@ class AdminUserController extends AbstractController
     }
 
     #[Route('/user/create', name: 'admin_user_create')]
-    public function createUser(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher): Response
-    {
-        $user = new User();
+public function createUser(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher): Response
+{
+    $user = new User();
 
-        // Sécurité : par défaut on force un rôle valide même si aucun n’est choisi
+    // Par défaut : rôle forcé selon le rôle du créateur
+    $currentRoles = $this->getUser()->getRoles();
+    if (in_array('ROLE_ADMIN', $currentRoles)) {
         $user->setRoles(['ROLE_CLIENT']);
+    } elseif (in_array('ROLE_SUPER_ADMIN', $currentRoles)) {
+        $user->setRoles(['ROLE_ADMIN']);
+    }
 
-        $form = $this->createForm(UserFormType::class, $user);
-        $form->handleRequest($request);
+    $form = $this->createForm(UserFormType::class, $user);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $plainPassword = $form->get('plainPassword')->getData();
-            $user->setPassword($hasher->hashPassword($user, $plainPassword));
-            $user->setActif(true);
+    if ($form->isSubmitted() && $form->isValid()) {
+        $plainPassword = $form->get('plainPassword')->getData();
+        $user->setPassword($hasher->hashPassword($user, $plainPassword));
+        $user->setActif(true);
 
-            $em->persist($user);
-            $em->flush();
-
-            $this->addFlash('success', 'Utilisateur créé avec succès.');
-            return $this->redirectToRoute('admin_users');
+        // 🔒 SÉCURITÉ : on écrase le rôle avec le seul autorisé (empêche de tricher avec DevTools)
+        if (in_array('ROLE_ADMIN', $currentRoles)) {
+            $user->setRoles(['ROLE_CLIENT']);
+        } elseif (in_array('ROLE_SUPER_ADMIN', $currentRoles)) {
+            $user->setRoles(['ROLE_ADMIN']);
         }
 
-        return $this->render('admin/create_user.html.twig', [
-            'form' => $form->createView(),
-        ]);
+        $em->persist($user);
+        $em->flush();
+
+        $this->addFlash('success', 'Utilisateur créé avec succès.');
+
+        // ✅ Redirection propre
+        return $this->redirectToRoute('admin_users');
     }
+
+    return $this->render('admin/create_user.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
+
 }

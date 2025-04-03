@@ -1,0 +1,60 @@
+{% extends 'base/site_base.html.twig' %}
+
+{% block title %}Gestion des administrateurs{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/admin_users.css') }}">
+{% endblock %}
+
+{% block body %}
+<h1>Liste des administrateurs</h1>
+
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success">{{ message }}</div>
+{% endfor %}
+{% for message in app.flashes('danger') %}
+    <div class="alert alert-danger">{{ message }}</div>
+{% endfor %}
+
+<div style="width: 90%; margin: 0 auto 20px auto; text-align: right;">
+    <a href="{{ path('superadmin_admin_create') }}" class="btn btn-success">+ Ajouter un administrateur</a>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Login</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Date naissance</th>
+            <th>Pays</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for admin in admins %}
+        <tr>
+            <td>{{ admin.login }}</td>
+            <td>{{ admin.nom }}</td>
+            <td>{{ admin.prenom }}</td>
+            <td>{{ admin.dateNaissance ? admin.dateNaissance|date('d/m/Y') : '—' }}</td>
+            <td>{{ admin.pays ? admin.pays.nom : '—' }}</td>
+            <td>
+                {% if admin != app.user %}
+                    <a class="btn btn-danger"
+                       href="{{ path('superadmin_admin_delete', {'id': admin.id}) }}"
+                       onclick="return confirm('Confirmer la suppression ?')">
+                        Supprimer
+                    </a>
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+    {% else %}
+        <tr><td colspan="6">Aucun administrateur trouvé.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

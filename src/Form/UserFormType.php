@@ -27,9 +27,9 @@ class UserFormType extends AbstractType
         $currentUser = $this->security->getUser();
         $currentRoles = $currentUser ? $currentUser->getRoles() : [];
 
+        // 🔒 Règle du sujet : on force à ne choisir qu'un seul rôle autorisé selon le rôle du créateur
         $roleChoices = [];
 
-        // 🔒 Règles du sujet :
         if (in_array('ROLE_ADMIN', $currentRoles)) {
             $roleChoices = ['Client' => 'ROLE_CLIENT'];
         } elseif (in_array('ROLE_SUPER_ADMIN', $currentRoles)) {
@@ -52,7 +52,7 @@ class UserFormType extends AbstractType
             ->add('roles', ChoiceType::class, [
                 'label' => 'Rôle',
                 'choices' => $roleChoices,
-                'multiple' => true, // Important : pas plusieurs rôles à la fois
+                'multiple' => true, // ❗️on impose un seul rôle à la fois
                 'expanded' => true,
             ])
             ->add('pays', EntityType::class, [
