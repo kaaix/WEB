@@ -78,27 +78,23 @@ class PanierController extends AbstractController
     }
 
     #[Route('/commander', name: 'client_panier_commander', methods: ['POST'])]
-    public function commander(Request $request, EntityManagerInterface $em): Response
-    {
-        $session = $request->getSession();
-        $panier = $session->get('panier', []);
+public function commander(Request $request, EntityManagerInterface $em): Response
+{
+    $panier = $request->getSession()->get('panier', []);
 
-        foreach ($panier as $produitId => $quantite) {
-            $produit = $em->getRepository(Produit::class)->find($produitId);
-            if ($produit && $produit->getStock() >= $quantite) {
-                $produit->setStock($produit->getStock() - $quantite);
-
-                // Retirer le produit si son stock est épuisé
-                if ($produit->getStock() === 0) {
-                    $em->remove($produit);
-                }
-            }
+    foreach ($panier as $produitId => $quantite) {
+        $produit = $em->getRepository(Produit::class)->find($produitId);
+        if ($produit && $produit->getStock() >= $quantite) {
+            $produit->setStock($produit->getStock() - $quantite);
+            $em->persist($produit); // 🔹 Cette ligne est indispensable !
         }
-
-        $em->flush();
-        $session->remove('panier');
-
-        $this->addFlash('success', '✅ Commande validée avec succès !');
-        return $this->redirectToRoute('client_produits');
     }
+
+    $em->flush(); // ✅ Les stocks sont maintenant mis à jour dans la base
+    $request->getSession()->remove('panier');
+
+    $this->addFlash('success', '✅ Commande validée avec succès !');
+    return $this->redirectToRoute('client_produits');
+}
+
 }
