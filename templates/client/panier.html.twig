@@ -8,9 +8,12 @@
     {% if produits is empty %}
         <p>Votre panier est vide.</p>
     {% else %}
-        <div class="mb-3 text-end">
+        <div class="mb-3 text-end d-flex justify-content-end gap-2">
             <form method="post" action="{{ path('client_panier_vider') }}">
                 <button type="submit" class="btn btn-danger">🗑️ Vider le panier</button>
+            </form>
+            <form method="post" action="{{ path('client_panier_commander') }}">
+                <button type="submit" class="btn btn-success">✅ Commander</button>
             </form>
         </div>
 
@@ -22,29 +25,36 @@
                     <th>Prix unitaire</th>
                     <th>Quantité</th>
                     <th>Sous-total</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% set total = 0 %}
                 {% for produit in produits %}
-                    {% set quantite = panier[produit.id] %}
+                    {% set quantite = panier[produit.id]|default(0) %}
                     {% set sous_total = produit.prix * quantite %}
                     {% set total = total + sous_total %}
                     <tr>
                         <td>
                             <img src="{{ asset('images/produits/' ~ produit.image) }}"
                                  alt="{{ produit.nom }}"
-                                 class="produit-image">
+                                 class="produit-image" style="max-height: 60px;">
                         </td>
                         <td>{{ produit.nom }}</td>
-                        <td>{{ produit.prix }} €</td>
+                        <td>{{ produit.prix|number_format(2, '.', '') }} €</td>
                         <td>{{ quantite }}</td>
-                        <td>{{ sous_total }} €</td>
+                        <td>{{ sous_total|number_format(2, '.', '') }} €</td>
+                        <td>
+                            <form method="post" action="{{ path('client_panier_supprimer_produit', { id: produit.id }) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('supprimer_' ~ produit.id) }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">❌ Retirer</button>
+                            </form>
+                        </td>
                     </tr>
                 {% endfor %}
                 <tr>
-                    <td colspan="4"><strong>Total</strong></td>
-                    <td><strong>{{ total }} €</strong></td>
+                    <td colspan="4" class="text-end"><strong>Total</strong></td>
+                    <td colspan="2"><strong>{{ total|number_format(2, '.', '') }} €</strong></td>
                 </tr>
             </tbody>
         </table>

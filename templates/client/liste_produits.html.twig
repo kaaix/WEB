@@ -1,58 +1,38 @@
 {% extends 'base/site_base.html.twig' %}
 
-{% block title %}Produits{% endblock %}
+{% block title %}Produits disponibles{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/produit.css') }}">
+{% endblock %}
 
 {% block body %}
-    <h1>Liste des produits disponibles</h1>
+    <h1 style="text-align: center;">Produits disponibles</h1>
 
-    <table class="table table-bordered mt-4">
-        <thead>
-            <tr>
-                <th>Image</th>
-                <th>Nom</th>
-                <th>Prix</th>
-                <th>Stock</th>
-                <th>Commande</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for produit in produits %}
-                {% set id = produit.id %}
-                {% set stock = produit.stock %}
-                {% set deja_commande = panier[id]|default(0) %}
-                {% set min = -deja_commande %}
-                {% set max = stock %}
-                {% if max == 0 and min == 0 %}
-                    {% set max = 1 %}
-                {% endif %}
-                <tr>
-                    <td>
-                        <img src="{{ asset('images/produits/' ~ produit.image) }}"
-                             alt="{{ produit.nom }}"
-                             class="produit-image">
-                    </td>
-                    <td>{{ produit.nom }}</td>
-                    <td>{{ produit.prix }} €</td>
-                    <td>{{ produit.stock }}</td>
-                    <td>
-                        {% if max > 0 or min < 0 %}
-                            <form method="post" action="{{ path('client_panier_ajouter') }}">
-                                <input type="hidden" name="produit_id" value="{{ id }}">
-                                <select name="quantite">
-                                    {% for i in min..max %}
-                                        <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>
-                                            {{ i > 0 ? '+' ~ i : (i < 0 ? i : '0') }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit">Commander</button>
-                            </form>
-                        {% else %}
-                            <span>Non disponible</span>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% for produit in produits %}
+        {% if produit.stock > 0 %}
+            <div class="produit-box">
+                <strong>{{ produit.nom }}</strong><br>
+                Prix : {{ produit.prix }} €<br>
+                Stock : {{ produit.stock }}<br>
+
+                {% set qtePanier = panier[produit.id]|default(0) %}
+                {% set max = produit.stock %}
+
+                <form method="post" action="{{ path('client_panier_ajouter') }}">
+                    <input type="hidden" name="produit_id" value="{{ produit.id }}">
+                    <label for="quantite">Quantité :</label>
+                    <select name="quantite" id="quantite">
+                        {% for i in -qtePanier..max %}
+                            <option value="{{ i }}" {% if i == 0 %}selected{% endif %}>{{ i }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">🛒 Ajouter</button>
+                </form>
+            </div>
+        {% endif %}
+    {% else %}
+        <p style="text-align: center;">Aucun produit disponible pour le moment.</p>
+    {% endfor %}
 {% endblock %}

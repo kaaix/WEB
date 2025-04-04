@@ -9,22 +9,19 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 
-#[Route('/panier')]
+#[Route('/client/panier')]
 class PanierController extends AbstractController
 {
-    #[Route('/', name: 'client_panier')]
-    public function index(Request $request, EntityManagerInterface $em): Response
+    #[Route('/', name: 'client_panier_afficher')]
+    public function afficher(EntityManagerInterface $em, Request $request): Response
     {
-        // Récupérer le panier en session
-        $session = $request->getSession();
-        $panier = $session->get('panier', []);
-
-        // Récupérer les produits à partir des IDs du panier
-        $ids = array_keys($panier);
+        $panier = $request->getSession()->get('panier', []);
         $produits = [];
 
-        if (!empty($ids)) {
-            $produits = $em->getRepository(Produit::class)->findBy(['id' => $ids]);
+        if (!empty($panier)) {
+            $produits = $em->getRepository(Produit::class)->findBy([
+                'id' => array_keys($panier),
+            ]);
         }
 
         return $this->render('client/panier.html.twig', [
@@ -32,12 +29,47 @@ class PanierController extends AbstractController
             'panier' => $panier,
         ]);
     }
-    #[Route('/vider', name: 'client_panier_vider', methods: ['POST'])]
-public function vider(Request $request): Response
-{
-    $request->getSession()->remove('panier');
-    $this->addFlash('success', '🧹 Panier vidé avec succès.');
-    return $this->redirectToRoute('client_panier');
-}
 
+    #[Route('/vider', name: 'client_panier_vider', methods: ['POST'])]
+    public function vider(Request $request): Response
+    {
+        $request->getSession()->remove('panier');
+        $this->addFlash('success', '🧹 Panier vidé.');
+        return $this->redirectToRoute('client_panier_afficher');
+    }
+
+    #[Route('/supprimer/{id}', name: 'client_panier_supprimer_produit', methods: ['POST'])]
+    public function supprimerProduit(int $id, Request $request): Response
+    {
+        if (!$this->isCsrfTokenValid('supprimer_' . $id, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton CSRF invalide.');
+            return $this->redirectToRoute('client_panier_afficher');
+        }
+
+        $panier = $request->getSession()->get('panier', []);
+        unset($panier[$id]);
+        $request->getSession()->set('panier', $panier);
+
+        $this->addFlash('success', '❌ Produit retiré du panier.');
+        return $this->redirectToRoute('client_panier_afficher');
+    }
+
+    #[Route('/commander', name: 'client_panier_commander', methods: ['POST'])]
+    public function commander(Request $request, EntityManagerInterface $em): Response
+    {
+        $panier = $request->getSession()->get('panier', []);
+
+        foreach ($panier as $produitId => $quantite) {
+            $produit = $em->getRepository(Produit::class)->find($produitId);
+            if ($produit && $produit->getStock() >= $quantite) {
+                $produit->setStock($produit->getStock() - $quantite);
+            }
+        }
+
+        $em->flush();
+        $request->getSession()->remove('panier');
+
+        $this->addFlash('success', '✅ Commande validée avec succès !');
+        return $this->redirectToRoute('client_produits');
+    }
 }

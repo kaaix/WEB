@@ -3,10 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Entity\Pays;
+use App\Entity\Panier;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity('login', message: 'Ce login est déjà utilisé.')]
@@ -26,7 +30,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    // Champ non mappé pour le formulaire d'inscription
+    // Champ temporaire pour formulaire
     private ?string $plainPassword = null;
 
     #[ORM\Column(length: 255)]
@@ -39,10 +43,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeInterface $dateNaissance = null;
 
     #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Pays $pays = null;
 
     #[ORM\Column(type: 'boolean')]
     private bool $actif = true;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Panier::class, orphanRemoval: true)]
+    private Collection $paniers;
+
+    public function __construct()
+    {
+        $this->paniers = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -157,6 +170,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setActif(bool $actif): self
     {
         $this->actif = $actif;
+        return $this;
+    }
+
+    /** @return Collection<int, Panier> */
+    public function getPaniers(): Collection
+    {
+        return $this->paniers;
+    }
+
+    public function addPanier(Panier $panier): self
+    {
+        if (!$this->paniers->contains($panier)) {
+            $this->paniers[] = $panier;
+            $panier->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removePanier(Panier $panier): self
+    {
+        if ($this->paniers->removeElement($panier)) {
+            if ($panier->getUser() === $this) {
+                $panier->setUser(null);
+            }
+        }
         return $this;
     }
 }

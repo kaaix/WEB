@@ -12,11 +12,14 @@ use Doctrine\ORM\EntityManagerInterface;
 #[Route('/produits')]
 class ProduitClientController extends AbstractController
 {
-    // 🔸 Liste des produits visibles par le client
     #[Route('/', name: 'client_produits')]
     public function index(EntityManagerInterface $em, Request $request): Response
     {
-        $produits = $em->getRepository(Produit::class)->findAll();
+        $produits = $em->getRepository(Produit::class)->createQueryBuilder('p')
+            ->where('p.stock > 0')
+            ->getQuery()
+            ->getResult();
+
         $panier = $request->getSession()->get('panier', []);
 
         return $this->render('client/liste_produits.html.twig', [
@@ -25,7 +28,6 @@ class ProduitClientController extends AbstractController
         ]);
     }
 
-    // 🔸 Traitement du formulaire (ajout/suppression produit dans panier)
     #[Route('/ajouter-au-panier', name: 'client_panier_ajouter', methods: ['POST'])]
     public function ajouterAuPanier(Request $request, EntityManagerInterface $em): Response
     {
@@ -41,14 +43,9 @@ class ProduitClientController extends AbstractController
         $panier = $session->get('panier', []);
         $panier[$id] = ($panier[$id] ?? 0) + $quantite;
 
-        // Si quantité à 0 on retire le produit
-        if ($panier[$id] === 0) {
+        if ($panier[$id] <= 0) {
             unset($panier[$id]);
         }
-
-        // Mise à jour du stock (sécurité, si tu veux)
-        // $produit->setStock($produit->getStock() - $quantite);
-        // $em->flush();
 
         $session->set('panier', $panier);
         $this->addFlash('success', '✅ Panier mis à jour !');
