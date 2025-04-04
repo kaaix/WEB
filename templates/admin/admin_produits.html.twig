@@ -50,9 +50,13 @@
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{{ path('admin_produit_delete', {'id': produit.id}) }}"
-                               class="btn btn-sm btn-danger"
-                               onclick="return confirm('Supprimer ce produit ?')">Supprimer</a>
+                            {# Bouton de modification (si tu as une route pour ça) #}
+                            {# <a href="{{ path('admin_produit_modifier', {'id': produit.id}) }}" class="btn btn-primary btn-sm">✏️ Modifier</a> #}
+
+                            <form method="post" action="{{ path('admin_produit_supprimer', {'id': produit.id}) }}" style="display:inline-block;" onsubmit="return confirm('Voulez-vous vraiment supprimer ce produit ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_produit_' ~ produit.id) }}">
+                                <button class="btn btn-danger btn-sm">🗑️ Supprimer</button>
+                            </form>
                         </td>
                     </tr>
                 {% endfor %}

@@ -4,6 +4,7 @@ namespace App\DataFixtures;
 
 use App\Entity\User;
 use App\Entity\Pays;
+use App\Entity\Produit;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -78,23 +79,26 @@ class AppFixtures extends Fixture
         $client2->setPassword($this->hasher->hashPassword($client2, 'boubou'));
         $manager->persist($client2);
 
-        // Sauvegarde en base
-        $manager->flush();
+        // --- Ajouter des produits ---
         $products = [
-    ['nom' => 'Zelda', 'prix' => 59.99, 'stock' => 100, 'image' => 'zelda.jpg'],
-    ['nom' => 'Mario Kart', 'prix' => 49.99, 'stock' => 80, 'image' => 'mario.jpg'],
-    ['nom' => 'Minecraft', 'prix' => 19.99, 'stock' => 200, 'image' => 'minecraft.jpg'],
-    ['nom' => 'FIFA 24', 'prix' => 69.99, 'stock' => 150, 'image' => 'fifa.jpg'],
-    ['nom' => 'Call of Duty', 'prix' => 59.99, 'stock' => 60, 'image' => 'cod.jpg'],
-];
-foreach ($products as $data) {
-    $produit = new \App\Entity\Produit();
-    $produit->setNom($data['nom']);
-    $produit->setPrix($data['prix']);
-    $produit->setStock($data['stock']);
-    $produit->setImage($data['image']); // <- ici on met juste le nom du fichier
-    $manager->persist($produit);
-}
+            ['nom' => 'Zelda', 'description' => 'Jeu d’aventure épique', 'prix' => 59.99, 'stock' => 100, 'image' => 'zelda.jpg'],
+            ['nom' => 'Mario Kart', 'description' => 'Course de kart multijoueur', 'prix' => 49.99, 'stock' => 80, 'image' => 'mario.jpg'],
+            ['nom' => 'Minecraft', 'description' => 'Jeu de construction en blocs', 'prix' => 19.99, 'stock' => 200, 'image' => 'minecraft.jpg'],
+            ['nom' => 'FIFA 24', 'description' => 'Football nouvelle génération', 'prix' => 69.99, 'stock' => 150, 'image' => 'fifa.jpg'],
+            ['nom' => 'Call of Duty', 'description' => 'FPS de guerre réaliste', 'prix' => 59.99, 'stock' => 60, 'image' => 'cod.jpg'],
+        ];
 
+        foreach ($products as $data) {
+            $produit = new Produit();
+            $produit->setNom($data['nom']);
+            $produit->setDescription($data['description']);
+            $produit->setPrix($data['prix']);
+            $produit->setStock($data['stock']);
+            $produit->setImage($data['image']);
+            $manager->persist($produit);
+        }
+
+        // ✅ Sauvegarde finale
+        $manager->flush();
     }
 }
