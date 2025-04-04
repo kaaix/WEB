@@ -4,10 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Mon Site de Vente{% endblock %}</title>
+
+    {# CSS global #}
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    {% block stylesheets %}{% endblock %} {# ➕ Ajouté ce bloc ici ! #}
+    
+    {# CSS additionnels pour les enfants (ex: produit.css, panier.css, etc.) #}
+    {% block stylesheets %}{% endblock %}
 </head>
 <body>
+
+    {# 🔹 Bandeau haut #}
     <header>
         <div class="header-content">
             <img src="{{ asset('images/bandeau_haut.png') }}" alt="Bandeau haut" class="header-banner">
@@ -18,14 +24,26 @@
         </div>
     </header>
 
+    {# 🔹 Menu personnalisé selon le rôle #}
     <nav>
-        {% block menu %}{# menu dépendant du rôle utilisateur #}{% endblock %}
+        {% block menu %}{% endblock %}
     </nav>
 
+    {# 🔹 Affichage des messages flash #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {# 🔹 Contenu principal #}
     <main>
         {% block body %}{% endblock %}
     </main>
 
+    {# 🔹 Pied de page avec le bandeau bas et le texte #}
     <footer>
         <img src="{{ asset('images/bandeau_bas.png') }}" alt="Bandeau bas" class="footer-banner">
         <div class="footer-text">
@@ -38,6 +56,7 @@
         </div>
     </footer>
 
+    {# 🔹 Logo en arrière-plan #}
     <div class="background-logo">
         <img src="{{ asset('images/Universite_de_Poitiers.png') }}" alt="Logo UP" class="logo-fond">
     </div>

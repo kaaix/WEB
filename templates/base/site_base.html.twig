@@ -12,8 +12,8 @@
             <li><a href="{{ path('app_logout') }}">Déconnexion</a></li>
             <li><a href="{{ path('app_profil') }}">Mon profil</a></li>
 
-            {# 🔽🔽 LIEN PANIER 🔽🔽 #}
-            {% if is_granted('ROLE_CLIENT') or is_granted('ROLE_ADMIN') %}
+            {# 🔽🔽 LIEN PANIER UNIQUEMENT POUR LES CLIENTS 🔽🔽 #}
+            {% if 'ROLE_CLIENT' in app.user.roles %}
                 {% set total_articles = 0 %}
                 {% if app.session.get('panier') is iterable %}
                     {% set total_articles = app.session.get('panier')|reduce((carry, qte) => carry + qte, 0) %}
@@ -23,11 +23,7 @@
                         🛒 Mon panier ({{ total_articles }})
                     </a>
                 </li>
-
-                {# 🔹 Lien vers produits juste sous le panier 🔹 #}
-                {% if 'ROLE_CLIENT' in app.user.roles %}
-                    <li><a href="{{ path('client_produits') }}">🛍️ Voir les produits disponibles</a></li>
-                {% endif %}
+                <li><a href="{{ path('client_produits') }}">🛍️ Voir les produits disponibles</a></li>
             {% endif %}
 
             {% if 'ROLE_ADMIN' in app.user.roles %}

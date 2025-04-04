@@ -48,3 +48,8 @@ img.produit-image:hover {
 .produit-box button:hover {
     background-color: #218838;
 }
+.produit-image {
+    max-height: 60px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}

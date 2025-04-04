@@ -36,9 +36,14 @@
                     {% set total = total + sous_total %}
                     <tr>
                         <td>
-                            <img src="{{ asset('images/produits/' ~ produit.image) }}"
-                                 alt="{{ produit.nom }}"
-                                 class="produit-image" style="max-height: 60px;">
+                            {% if produit.image %}
+                                <img src="{{ asset('uploads/produits/' ~ produit.image) }}"
+                                     alt="{{ produit.nom }}"
+                                     class="produit-image"
+                                     style="max-height: 60px;">
+                            {% else %}
+                                <span class="text-muted">Pas d'image</span>
+                            {% endif %}
                         </td>
                         <td>{{ produit.nom }}</td>
                         <td>{{ produit.prix|number_format(2, '.', '') }} €</td>

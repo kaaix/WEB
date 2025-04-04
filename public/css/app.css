@@ -39,3 +39,21 @@ body {
 .logo-fond {
     height: 100px;
 }
+
+.alert {
+    padding: 10px;
+    margin: 10px auto;
+    max-width: 800px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert-error, .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}

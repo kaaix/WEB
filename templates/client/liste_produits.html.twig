@@ -10,9 +10,14 @@
 {% block body %}
     <h1 style="text-align: center;">Produits disponibles</h1>
 
+    <!-- 🔍 Barre de recherche -->
+    <div style="width: 50%; margin: 20px auto;">
+        <input type="text" id="searchProduit" class="form-control" placeholder="🔎 Rechercher un produit...">
+    </div>
+
     {% for produit in produits %}
         {% if produit.stock > 0 %}
-            <div class="produit-box">
+            <div class="produit-box" id="produit-{{ produit.id }}" draggable="true" ondragstart="drag(event)">
                 <strong>{{ produit.nom }}</strong><br>
                 Prix : {{ produit.prix }} €<br>
                 Stock : {{ produit.stock }}<br>
@@ -24,15 +29,69 @@
                     <input type="hidden" name="produit_id" value="{{ produit.id }}">
                     <label for="quantite">Quantité :</label>
                     <select name="quantite" id="quantite">
-                        {% for i in -qtePanier..max %}
-                            <option value="{{ i }}" {% if i == 0 %}selected{% endif %}>{{ i }}</option>
+                        {% for i in 1..max %}
+                            <option value="{{ i }}">{{ i }}</option>
                         {% endfor %}
                     </select>
-                    <button type="submit">🛒 Ajouter</button>
+                    <button type="submit" class="btn btn-primary">🛒 Ajouter</button>
                 </form>
             </div>
         {% endif %}
     {% else %}
         <p style="text-align: center;">Aucun produit disponible pour le moment.</p>
     {% endfor %}
+
+    <!-- 🛒 Zone de dépôt du panier -->
+    <div id="panier-dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"
+         style="width: 50%; margin: 30px auto; padding: 20px; border: 2px dashed #aaa; text-align: center;">
+        🛒 Déposez un produit ici pour l'ajouter automatiquement au panier (1 ex.)
+    </div>
+
+    <!-- 🔍 + 🖱️ Scripts -->
+    <script>
+        // 🔍 Filtrage en live
+        document.getElementById('searchProduit').addEventListener('input', function () {
+            const value = this.value.toLowerCase();
+            const produits = document.querySelectorAll('.produit-box');
+
+            produits.forEach(produit => {
+                const text = produit.innerText.toLowerCase();
+                produit.style.display = text.includes(value) ? '' : 'none';
+            });
+        });
+
+        // 🖱️ Drag & Drop
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const id = ev.dataTransfer.getData("text");
+            const produitId = id.replace("produit-", "");
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ path("client_panier_ajouter") }}';
+
+            const inputId = document.createElement('input');
+            inputId.type = 'hidden';
+            inputId.name = 'produit_id';
+            inputId.value = produitId;
+            form.appendChild(inputId);
+
+            const inputQuantite = document.createElement('input');
+            inputQuantite.type = 'hidden';
+            inputQuantite.name = 'quantite';
+            inputQuantite.value = 1;
+            form.appendChild(inputQuantite);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
 {% endblock %}
